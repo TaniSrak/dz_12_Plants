@@ -1,6 +1,7 @@
 ﻿#include <iostream>
 #include <string>
 #include <vector>
+#include <memory>
 
 using namespace std;
 
@@ -47,7 +48,7 @@ public:
 class Tree
 {
 public:
-	virtual Harvest* GetHarvest()=0;
+	virtual std::shared_ptr<Harvest> GetHarvest() = 0; //исправила
 
 	Tree(int harvestCount, std::string color, std::string size)
 	{
@@ -64,12 +65,12 @@ protected:
 class AppleTree : public Tree
 {
 public:
-	Harvest* GetHarvest() 
+	std::shared_ptr<Harvest> GetHarvest() override //исправила
 	{
 		if (harvestCount_ > 0)
 		{
 			harvestCount_--;
-			return new Apple("Apple", 50, "Red");
+			return std::make_shared<Apple>("Apple", 50, "Red"); //исправила
 		}
 		else
 		{
@@ -83,16 +84,28 @@ public:
 
 int main(){
 
-	AppleTree at = AppleTree(5, "Green", "Big");
+	setlocale(LC_ALL, "Russian");
+
+	/*AppleTree at = AppleTree(5, "Green", "Big");
 	Harvest* h = at.GetHarvest();
 	if (h != nullptr)
 	{
 		std::cout << h->GetName();
-	}
+	}*/
 
 	//Apple* ha = (Apple)at.GetHarvest();
 
+	std::unique_ptr<Tree> appleTree = std::make_unique<AppleTree>(10, "Green", "Large");
 
+	std::vector<std::shared_ptr<Harvest>> harvests;
+
+	// Собираем урожай с дерева
+	while (auto harvest = appleTree->GetHarvest()) {
+		// Добавляем урожай в вектор
+		harvests.push_back(harvest);
+	}
+
+	std::cout << "Собранный урожай: Name: " << harvests[0]->GetName() << ", Weight: " << harvests[0]->GetWeight() << ", Color: " << harvests[0]->GetColor() << std::endl;
 
 
 	return 0;
